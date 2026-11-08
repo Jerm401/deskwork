@@ -1,0 +1,30 @@
+{
+  "name": "deskwork",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI secretaries that do real work, on metered, prepaid credits. Customers ask for features and the AI builds sandboxed pages into their dashboard.",
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "build": "vite build",
+    "start": "node server/index.ts",
+    "dev": "node --watch-path=server server/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"server/**/*.test.ts\""
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^5.9.0",
+    "vite": "^8.3.4"
+  }
+}
