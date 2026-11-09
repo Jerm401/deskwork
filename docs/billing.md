@@ -28,7 +28,8 @@
    parties. If that's still true, the cost basis for a markup doesn't exist and the
    terms may forbid it. A per-token provider with explicit API terms (DeepSeek's own
    API, OpenRouter, Together, Fireworks, or Anthropic/OpenAI) fits this model
-   directly. Switching is `LLM_BASE_URL` + key + `data/models.json`.
+   directly. Switching or mixing providers is a key plus `data/models.json`
+   (docs/providers.md).
 2. **Stripe.** `POST /api/billing/checkout` returns 501. Wire Stripe Checkout
    there. The `checkout.session.completed` webhook calls
    `grant(db, ws, "purchase", micros, sessionId)`. Make it idempotent on the session

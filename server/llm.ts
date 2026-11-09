@@ -3,8 +3,9 @@
 // is no code path that spends our provider money without charging for it.
 //
 // The wire format is OpenAI chat completions, which Ollama Cloud, DeepSeek,
-// OpenRouter, Together and most others speak. Switching provider is a config
-// change (LLM_BASE_URL + key + models.json prices).
+// OpenRouter, Together and most others speak. Each model in models.json names
+// its provider, so switching or mixing providers is a config change (a key,
+// plus the model's price in models.json). See docs/providers.md.
 import type { DB } from "./db.ts";
 import type { Config, ModelPrice } from "./config.ts";
 import { assertCanSpend, findModel, recordUsage, type UsageInput } from "./billing.ts";
@@ -150,10 +151,22 @@ function mockPage(request: string) {
   };
 }
 
+/** Sends each call to the provider its model names. Models are tied to one provider
+ *  because their price is; never fall back to another provider at a different cost. */
+export function routingProvider(cfg: Config): Provider {
+  const clients = new Map(Object.entries(cfg.providers).map(([name, p]) => [name, openAICompatible(p.baseURL, p.apiKey)]));
+  return {
+    complete(req) {
+      const name = req.model.provider ?? "default";
+      const client = clients.get(name);
+      if (!client) throw new ProviderError(`Model ${req.model.id} needs provider "${name}", which has no key.`);
+      return client.complete(req);
+    },
+  };
+}
+
 export function makeProvider(cfg: Config): Provider {
-  if (cfg.provider === "mock") return mockProvider();
-  if (!cfg.apiKey) throw new Error("LLM_PROVIDER is openai-compatible but no key is set (LLM_API_KEY or data/llm-key).");
-  return openAICompatible(cfg.baseURL, cfg.apiKey);
+  return cfg.provider === "mock" ? mockProvider() : routingProvider(cfg);
 }
 
 export interface MeteredRequest extends Omit<CompletionRequest, "model"> {

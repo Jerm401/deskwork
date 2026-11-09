@@ -318,7 +318,16 @@ function Keys() {
   );
 }
 
+interface ProviderStatus {
+  mode: string;
+  markup: number;
+  providers: { name: string; baseURL: string }[];
+  models: { id: string; provider: string; upstream: string; cost: { inputPerM: number; outputPerM: number }; price: { inputPerM: number; outputPerM: number } }[];
+  unavailable: { id: string; reason: string }[];
+}
+
 function Admin() {
+  const { data: prov } = useGet<ProviderStatus>("/admin/providers");
   const { data, reload } = useGet<{ id: string; name: string; owner_email: string; balance_micros: number; revenue_micros: number; cost_micros: number }[]>("/admin/workspaces");
   return (
     <div>
@@ -330,6 +339,22 @@ function Admin() {
             <td><button onClick={() => { const usd = prompt("Grant how many dollars of credit?"); if (usd) api.post(`/admin/workspaces/${w.id}/grant`, { usd: Number(usd), note: "manual" }).then(reload, (e: Error) => alert(e.message)); }}>Grant</button></td></tr>
         ))}</tbody>
       </table>
+      {prov && (
+        <>
+          <h2>Models we sell</h2>
+          <p className="muted small">
+            {prov.mode === "mock" ? "Mock mode: no provider keys, canned replies." : `Providers with a key: ${prov.providers.map((p) => p.name).join(", ")}.`} Markup ×{prov.markup}. Prices per million tokens, input / output.
+          </p>
+          <table>
+            <thead><tr><th>Model</th><th>Provider</th><th className="num">Our cost</th><th className="num">Customer price</th></tr></thead>
+            <tbody>{prov.models.map((m) => (
+              <tr key={m.id}><td>{m.id}{m.upstream !== m.id && <div className="muted small">{m.upstream}</div>}</td><td>{m.provider}</td>
+                <td className="num">${m.cost.inputPerM} / ${m.cost.outputPerM}</td><td className="num">${m.price.inputPerM} / ${m.price.outputPerM}</td></tr>
+            ))}</tbody>
+          </table>
+          {prov.unavailable.length > 0 && <p className="warn small">Not offered: {prov.unavailable.map((u) => `${u.id} (${u.reason})`).join("; ")}</p>}
+        </>
+      )}
     </div>
   );
 }

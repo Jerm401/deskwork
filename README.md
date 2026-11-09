@@ -36,18 +36,21 @@ With no model key it runs in **demo mode**: a mock model gives canned
 answers and builds a sample page, and metering still runs. That's enough to
 click through the whole product. For real models:
 
-    LLM_API_KEY=...  LLM_BASE_URL=https://ollama.com/v1  npm start
+    DEEPSEEK_API_KEY=...  npm start
 
-Any OpenAI-compatible provider works. Put real prices in `data/models.json`
-first (the format is `ModelPrice` in `server/config.ts`); the built-in prices
-are placeholders.
+Any OpenAI-compatible provider works, and several can run side by side: each
+model in `data/models.json` names its provider and what that provider charges
+us. Copy `models.example.json` and put in real prices first; the built-in ones
+are placeholders. [docs/providers.md](docs/providers.md) covers adding a provider.
 
 | Variable | Default | |
 |---|---|---|
 | `PORT`, `HOST` | `4400`, `127.0.0.1` | |
-| `DATA_DIR` | `./data` | SQLite db, `models.json`, `llm-key` |
-| `LLM_PROVIDER` | `mock` without a key | `openai-compatible` or `mock` |
-| `LLM_BASE_URL`, `LLM_API_KEY` | Ollama Cloud | or `data/llm-key` |
+| `DATA_DIR` | `./data` | SQLite db, `models.json`, `providers.json`, `keys/` |
+| `<PROVIDER>_API_KEY` | | e.g. `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`; or `data/keys/<provider>` |
+| `LLM_PROVIDER` | `mock` without any key | `openai-compatible` or `mock` |
+| `DEFAULT_MODEL` | first in `models.json` | |
+| `LLM_BASE_URL`, `LLM_API_KEY` | | single-provider shortcut (provider `default`) |
 | `MARKUP` | `1.25` | customer price = cost × markup |
 | `FREE_CREDITS_USD` | `2` | per new account |
 | `PAGE_AI_DAILY_CAP_USD` | `0.25` | per page, per day |

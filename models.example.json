@@ -1,0 +1,4 @@
+[
+  { "id": "fast", "provider": "deepseek", "upstream": "deepseek-chat", "label": "Fast (everyday secretary work)", "inputPerM": 0.3, "outputPerM": 1.2 },
+  { "id": "builder", "provider": "openrouter", "upstream": "qwen/qwen3-coder", "label": "Builder (writes your pages)", "inputPerM": 0.5, "outputPerM": 2.0 }
+]

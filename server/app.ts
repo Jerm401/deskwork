@@ -192,6 +192,19 @@ export function createApp(db: DB, cfg: Config, provider: Provider, distDir?: str
 
   // ---- Admin (us, not customers) ----
   app.get("/api/admin/workspaces", auth, requireAdmin, h((_req, res) => void res.json(adminOverview(db))));
+  app.get("/api/admin/providers", auth, requireAdmin, h((_req, res) => {
+    // Names and URLs only; keys never leave the server.
+    res.json({
+      mode: cfg.provider,
+      providers: Object.entries(cfg.providers).map(([name, p]) => ({ name, baseURL: p.baseURL })),
+      models: cfg.models.map((m) => {
+        const sell = listPrice(cfg, m);
+        return { id: m.id, provider: m.provider ?? "default", upstream: m.upstream ?? m.id, cost: { inputPerM: m.inputPerM, outputPerM: m.outputPerM }, price: { inputPerM: sell.inputPerM, outputPerM: sell.outputPerM } };
+      }),
+      unavailable: cfg.unavailableModels,
+      markup: cfg.markup,
+    });
+  }));
   app.post("/api/admin/workspaces/:id/grant", auth, requireAdmin, h((req, res) => {
     const usdAmount = Number(req.body?.usd);
     if (!(usdAmount > 0 && usdAmount <= 1000)) throw new AuthError("Grant between $0 and $1000.");
